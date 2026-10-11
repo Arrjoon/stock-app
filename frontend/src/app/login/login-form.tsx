@@ -1,10 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import api from "@/api/apiclient/axios";
-import { setSession } from "@/lib/session";
+import { getAccessToken, setSession } from "@/lib/session";
 
 export function LoginForm() {
   const router = useRouter();
@@ -12,6 +12,15 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (getAccessToken()) {
+      router.replace("/companies");
+      return;
+    }
+    setReady(true);
+  }, [router]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -31,6 +40,10 @@ export function LoginForm() {
     } finally {
       setPending(false);
     }
+  }
+
+  if (!ready) {
+    return null;
   }
 
   return (
