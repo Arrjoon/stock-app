@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import IsAnalystOrAdmin, IsViewerOrAbove
 from apps.companies.serializers import ArticleSerializer, RecategorizeSerializer
 from apps.news.models import Article, ArticleTag, TagCorrection
+from apps.realtime.notify import publish_update
 from common.responses import success_response
 
 
@@ -62,4 +63,5 @@ class RecategorizeView(APIView):
         )
         article.categorized = True
         article.save(update_fields=["categorized"])
+        publish_update("article.categorized", article_id=article.id, company_ids=company_ids)
         return success_response(ArticleSerializer(article).data, message="Tags updated.")

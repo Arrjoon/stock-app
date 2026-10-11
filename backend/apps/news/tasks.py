@@ -65,8 +65,10 @@ def fetch_article(self, portal: str, url: str) -> int | None:
         )
         if created:
             from apps.analysis.tasks import categorize_article
+            from apps.realtime.notify import publish_update
 
             categorize_article.delay(article.id)
+            publish_update("article.saved", article_id=article.id, portal=article.portal)
         return article.id
     except Exception as exc:  # noqa: BLE001
         logger.exception("fetch_article failed for %s", url)

@@ -41,6 +41,9 @@ def crawl_prices(self, run_id=None) -> int:
             finish_failed(run, summary, items=0)
             return 0
         finish_success(run, items=written, error=summary)
+        from apps.realtime.notify import publish_update
+
+        publish_update("prices.updated", rows=written)
         return written
     except Exception as exc:  # noqa: BLE001
         finish_failed(run, str(exc), items=written)
