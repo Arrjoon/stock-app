@@ -1,8 +1,8 @@
 # NEPSE Stock App
 
 Role-gated dashboard for NEPSE prices, floorsheet behavior, and tagged news.
-Section 1 (crawling) is implemented. Categorization, analysis APIs, and the
-frontend dashboard come later.
+Crawling and automatic company tagging are implemented. Buyer/seller behavior,
+analysis APIs, and the frontend dashboard come later.
 
 Discovery notes live in [`docs/data-sources.md`](docs/data-sources.md).
 
@@ -36,6 +36,7 @@ docker compose exec web python manage.py seed_demo_users
 docker compose exec web python manage.py crawl_now --kind news --portal merolagani
 docker compose exec web python manage.py crawl_now --kind prices
 docker compose exec web python manage.py crawl_now --kind floorsheet
+docker compose exec web python manage.py categorize_news
 ```
 
 `sync_companies` upserts rows from `companies.yaml`. Crawlers always loop
@@ -58,7 +59,7 @@ Redis. A worker consumes three queues:
 |---|---|
 | `crawl` | `crawl_portal_news`, `fetch_article` |
 | `market` | `crawl_prices`, `crawl_floorsheet` |
-| `ml` | reserved `categorize_article` stub |
+| `ml` | `categorize_article` |
 
 `crawl_portal_news` only collects URLs, skips rows already in `Article`, and
 fans out one `fetch_article` task per new URL. It does not download every
@@ -168,8 +169,18 @@ docker compose exec web python manage.py sync_beat_schedule
 Beat uses `DatabaseScheduler`. News portals every `CRAWL_NEWS_MINUTES`
 (default 30). Prices after close Mon–Fri 15:00 NPT; floorsheet 15:15 NPT.
 
-After an article is saved, `categorize_article.delay(article.id)` is queued.
-That task is a no-op stub until Section 2.
+## Automatic categorization
+
+After each new article is saved, `categorize_article` runs on the `ml` queue.
+It checks the title and body against every active company:
+
+| Match | Confidence |
+|---|---|
+| Symbol as a whole word (`NABIL`) | 0.95 |
+| Full company name | 0.90 |
+| Alias (`Nabil Bank`, `Nepal Telecom`) | 0.80 |
+
+A hit is stored as `ArticleTag` with `source=auto` and `matched_on` listing the terms. The same URL is not tagged twice. Manual tags are not replaced. Words that only contain the symbol (`SCNABILX`) are ignored. `categorize_news` retags articles already in the database.
 
 ## Tests
 
