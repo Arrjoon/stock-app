@@ -4,9 +4,11 @@ import yaml
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.companies.models import Company
+
 
 class Command(BaseCommand):
-    help = "Load companies.yaml (stub — does not write to the database yet)."
+    help = "Upsert companies from companies.yaml by symbol."
 
     def handle(self, *args, **options):
         candidates = [
@@ -20,11 +22,30 @@ class Command(BaseCommand):
 
         data = yaml.safe_load(path.read_text()) or {}
         companies = data.get("companies", [])
+        if not companies:
+            raise CommandError(f"No companies listed in {path}.")
+
+        created_count = 0
+        updated_count = 0
+        for row in companies:
+            symbol = (row.get("symbol") or "").strip().upper()
+            if not symbol:
+                raise CommandError("Each company must have a symbol.")
+            _, created = Company.objects.update_or_create(
+                symbol=symbol,
+                defaults={
+                    "name": row.get("name") or symbol,
+                    "sector": row.get("sector") or "",
+                    "aliases": row.get("aliases") or [],
+                    "active": row.get("active", True),
+                },
+            )
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+
         self.stdout.write(
-            f"Loaded {len(companies)} companies from {path} (sync not implemented)."
+            f"Synced {len(companies)} companies from {path} "
+            f"({created_count} created, {updated_count} updated)."
         )
-        for company in companies:
-            symbol = company.get("symbol", "?")
-            name = company.get("name", "")
-            aliases = ", ".join(company.get("aliases") or [])
-            self.stdout.write(f"  {symbol}: {name} [{aliases}]")

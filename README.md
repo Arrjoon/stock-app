@@ -27,9 +27,10 @@ Watchlist symbols live in `companies.yaml`. Adding a company is a config change.
 
 ```bash
 docker compose exec web python manage.py sync_companies
+docker compose exec web python manage.py seed_demo_users
 ```
 
-The command currently loads and prints the YAML; it does not write rows yet.
+`sync_companies` upserts rows from `companies.yaml`. Demo user passwords come from `SEED_*_PASSWORD` in `.env`.
 
 ## Local development without Docker
 

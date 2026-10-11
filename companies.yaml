@@ -1,25 +1,41 @@
 companies:
   - symbol: NABIL
     name: Nabil Bank Limited
+    sector: Commercial Banks
     aliases: [Nabil, Nabil Bank]
+    active: true
   - symbol: NICA
     name: NIC Asia Bank Limited
+    sector: Commercial Banks
     aliases: [NIC Asia, NICA Bank]
+    active: true
   - symbol: NMB
     name: NMB Bank Limited
+    sector: Commercial Banks
     aliases: [NMB, NMB Bank]
+    active: true
   - symbol: SCB
     name: Standard Chartered Bank Nepal Limited
+    sector: Commercial Banks
     aliases: [Standard Chartered, SCB Nepal]
+    active: true
   - symbol: NLIC
     name: Nepal Life Insurance Company Limited
+    sector: Life Insurance
     aliases: [Nepal Life, NLIC]
+    active: true
   - symbol: NTC
     name: Nepal Doorsanchar Company Limited
+    sector: Telecommunications
     aliases: [Nepal Telecom, NTC]
+    active: true
   - symbol: UPPER
     name: Upper Tamakoshi Hydropower Limited
+    sector: Hydro Power
     aliases: [Upper Tamakoshi, UPPER]
+    active: true
   - symbol: HIDCL
     name: Hydroelectricity Investment and Development Company Limited
+    sector: Investment
     aliases: [HIDCL, HIDCL Nepal]
+    active: true

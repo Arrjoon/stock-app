@@ -8,8 +8,15 @@ class User(AbstractUser):
         ANALYST = "analyst", "Analyst"
         VIEWER = "viewer", "Viewer"
 
+    email = models.EmailField("email address", unique=True)
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
         default=Role.VIEWER,
     )
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
+
+    def __str__(self):
+        return self.email

@@ -167,6 +167,10 @@ CELERY_TIMEZONE = TIME_ZONE
 
 COMPANIES_YAML = env("COMPANIES_YAML", default=str(BASE_DIR.parent / "companies.yaml"))
 
+SEED_ADMIN_PASSWORD = env("SEED_ADMIN_PASSWORD", default="")
+SEED_ANALYST_PASSWORD = env("SEED_ANALYST_PASSWORD", default="")
+SEED_VIEWER_PASSWORD = env("SEED_VIEWER_PASSWORD", default="")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
