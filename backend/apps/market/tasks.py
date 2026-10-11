@@ -69,6 +69,9 @@ def crawl_floorsheet(self, run_id=None) -> int:
             finish_failed(run, summary or "No floorsheet rows", items=0)
             return 0
         finish_success(run, items=written, error=summary)
+        from apps.analysis.tasks import compute_behavior
+
+        compute_behavior.delay()
         return written
     except Exception as exc:  # noqa: BLE001
         finish_failed(run, str(exc), items=written)

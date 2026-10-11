@@ -185,6 +185,7 @@ CELERY_TASK_ROUTES = {
     "apps.market.tasks.crawl_prices": {"queue": "market"},
     "apps.market.tasks.crawl_floorsheet": {"queue": "market"},
     "apps.analysis.tasks.categorize_article": {"queue": "ml"},
+    "apps.analysis.tasks.compute_behavior": {"queue": "ml"},
 }
 
 COMPANIES_YAML = env("COMPANIES_YAML", default=str(BASE_DIR.parent / "companies.yaml"))

@@ -2,6 +2,7 @@ import logging
 
 from celery import shared_task
 
+from apps.analysis.compute import compute_active_companies
 from apps.news.categorizer import categorize_article as apply_categories
 from apps.news.models import Article
 
@@ -16,4 +17,11 @@ def categorize_article(article_id: int) -> int:
         return 0
     written = apply_categories(article)
     logger.info("categorized article_id=%s tags=%s", article_id, written)
+    return written
+
+
+@shared_task(name="apps.analysis.tasks.compute_behavior")
+def compute_behavior() -> int:
+    written = compute_active_companies()
+    logger.info("computed behavior rows=%s", written)
     return written

@@ -1,8 +1,8 @@
 # NEPSE Stock App
 
 Role-gated dashboard for NEPSE prices, floorsheet behavior, and tagged news.
-Crawling and automatic company tagging are implemented. Buyer/seller behavior,
-analysis APIs, and the frontend dashboard come later.
+Crawling, automatic company tagging, and buyer/seller behavior are implemented.
+Analysis APIs and the frontend dashboard come later.
 
 Discovery notes live in [`docs/data-sources.md`](docs/data-sources.md).
 
@@ -37,6 +37,7 @@ docker compose exec web python manage.py crawl_now --kind news --portal merolaga
 docker compose exec web python manage.py crawl_now --kind prices
 docker compose exec web python manage.py crawl_now --kind floorsheet
 docker compose exec web python manage.py categorize_news
+docker compose exec web python manage.py compute_analysis
 ```
 
 `sync_companies` upserts rows from `companies.yaml`. Crawlers always loop
@@ -59,7 +60,7 @@ Redis. A worker consumes three queues:
 |---|---|
 | `crawl` | `crawl_portal_news`, `fetch_article` |
 | `market` | `crawl_prices`, `crawl_floorsheet` |
-| `ml` | `categorize_article` |
+| `ml` | `categorize_article`, `compute_behavior` |
 
 `crawl_portal_news` only collects URLs, skips rows already in `Article`, and
 fans out one `fetch_article` task per new URL. It does not download every
@@ -181,6 +182,16 @@ It checks the title and body against every active company:
 | Alias (`Nabil Bank`, `Nepal Telecom`) | 0.80 |
 
 A hit is stored as `ArticleTag` with `source=auto` and `matched_on` listing the terms. The same URL is not tagged twice. Manual tags are not replaced. Words that only contain the symbol (`SCNABILX`) are ignored. `categorize_news` retags articles already in the database.
+
+## Buyer and seller behavior
+
+`compute_analysis` writes one `AnalysisResult` per company per price date:
+
+- **VWAP** for a daily bar is `(high + low + close) / 3`. `close_vs_vwap_pct` is how far the close sits from that.
+- **Pressure** is `((close - low) - (high - close)) / (high - low) * volume`. `pressure_5d` is the 5-day average.
+- **Volume anomaly** is a z-score of today's volume against up to 20 earlier sessions. Above 2.5 is flagged.
+- **Brokers** are ranked from the floorsheet. Each broker's `net_qty` is buy quantity minus sell quantity. `top_buyers` are the largest net buyers. `top_sellers` are the largest net sellers. Each row includes buy quantity, sell quantity, and amounts.
+- **News count** is how many tagged articles were published that day. Next-day return and volume change use the following trading session.
 
 ## Tests
 
