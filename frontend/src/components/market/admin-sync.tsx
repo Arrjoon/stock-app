@@ -67,7 +67,7 @@ export function AdminSync() {
       <PageHeader
         kicker="Admin"
         title="Sync market data"
-        description="Sync now fetches news, a month of prices, and the latest floorsheet immediately. Weekday Beat still refreshes prices at 15:00, the floorsheet at 15:15, and behavior at 15:45. News keeps its 30-minute schedule. The first run is slow because NEPSE is called once per company, and the floorsheet is read page by page after the per-company endpoint is blocked."
+        description="Sync now fetches news, a month of prices, and the latest floorsheet immediately. "
       />
       {me && me.role !== "admin" ? <ErrorState message="Only an admin can start a sync." /> : null}
       {me?.role === "admin" ? (

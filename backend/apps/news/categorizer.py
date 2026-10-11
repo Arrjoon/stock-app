@@ -42,6 +42,8 @@ def match_companies(title: str, body: str, companies) -> list[dict]:
 def categorize_article(article: Article) -> int:
     """Replace automatic tags. Manual tags for the same company are left as-is."""
     companies = list(Company.objects.filter(active=True))
+    if not companies:
+        return 0
     matches = match_companies(article.title, article.body, companies)
     manual_ids = set(
         ArticleTag.objects.filter(article=article, source=ArticleTag.Source.MANUAL).values_list(

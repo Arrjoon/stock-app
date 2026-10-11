@@ -66,7 +66,12 @@ export function CompareDashboard() {
         <div className="grid gap-4 lg:grid-cols-3">
           <RankList title="Most volatile" rows={payload.most_volatile} format={(row) => `${row.volatility_pct.toFixed(2)}%`} />
           <RankList title="Most active" rows={payload.most_active} format={(row) => row.volume.toLocaleString()} />
-          <RankList title="Most in the news" rows={payload.most_in_the_news} format={(row) => String(row.news_count)} />
+          <RankList
+            title="Most in the news"
+            rows={payload.most_in_the_news.filter((row) => row.news_count > 0)}
+            format={(row) => String(row.news_count)}
+            empty="No tagged articles in the last 30 days."
+          />
         </div>
       ) : null}
     </div>
@@ -77,14 +82,17 @@ function RankList({
   title,
   rows,
   format,
+  empty,
 }: {
   title: string;
   rows: Row[];
   format: (row: Row) => string;
+  empty?: string;
 }) {
   return (
     <section className="rounded-2xl border border-line bg-paper p-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-60">{title}</h2>
+      {rows.length === 0 && empty ? <p className="text-sm text-ink-60">{empty}</p> : null}
       <ol className="grid gap-2">
         {rows.map((row, index) => (
           <li key={row.id}>

@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db.models import Count, Q
 
 from apps.news.categorizer import categorize_article
 from apps.news.models import Article
@@ -15,7 +16,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        articles = Article.objects.all() if options["all"] else Article.objects.filter(categorized=False)
+        if options["all"]:
+            articles = Article.objects.all()
+        else:
+            articles = Article.objects.annotate(tag_count=Count("tags")).filter(Q(categorized=False) | Q(tag_count=0))
         tagged = 0
         seen = 0
         for article in articles.iterator():
