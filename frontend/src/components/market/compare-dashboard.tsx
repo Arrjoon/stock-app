@@ -51,12 +51,12 @@ export function CompareDashboard() {
     void load();
   }, [load]);
 
-  const connected = useLiveRefresh(load);
+  const live = useLiveRefresh(load);
 
   return (
     <div className="grid gap-6">
       <PageHeader
-        kicker={connected ? "Live" : "Connecting"}
+        kicker={live.connected ? "Live" : "Reconnecting"}
         title="Compare companies"
         description="Ranked over the last 30 days. Volatility is the standard deviation of daily returns. Activity is total volume. News is tagged articles."
       />
@@ -94,7 +94,12 @@ function RankList({
                 <span className="font-semibold">{row.symbol}</span>
                 <span className="mt-0.5 block text-xs text-ink-60">{row.name}</span>
               </span>
-              <span className="text-sm text-ink-80">{format(row)}</span>
+              <span className="grid justify-items-end gap-1 text-sm text-ink-80">
+                <span>{format(row)}</span>
+                <span className="h-1.5 w-16 overflow-hidden rounded-full bg-white/10">
+                  <span className="block h-full bg-[var(--color-up)]" style={{ width: `${Math.max(8, 100 - index * 12)}%` }} />
+                </span>
+              </span>
             </Link>
           </li>
         ))}

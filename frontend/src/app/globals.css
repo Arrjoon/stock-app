@@ -10,8 +10,11 @@
   --color-accent-hover: #7eb0ff;
   --color-accent-soft: rgba(91, 157, 255, 0.16);
   --color-paper: rgba(16, 22, 34, 0.86);
-  --color-danger: #f0a4a4;
+  --color-danger: #ff8b8b;
   --color-danger-bg: rgba(176, 48, 48, 0.22);
+  --color-up: #3ddc97;
+  --color-down: #ff6b6b;
+  --color-warn: #f5c16c;
 }
 
 :root {
@@ -20,7 +23,8 @@
 
 body {
   background:
-    radial-gradient(720px 380px at 88% -18%, rgba(91, 157, 255, 0.14), transparent 58%),
+    radial-gradient(720px 380px at 88% -18%, rgba(61, 220, 151, 0.08), transparent 58%),
     var(--color-bg);
   color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
 }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import api from "@/api/apiclient/axios";
 import { ErrorState } from "@/components/error/ErrorState";
-import { setAccessToken } from "@/lib/session";
+import { setSession } from "@/lib/session";
 
 export function LoginForm() {
   const router = useRouter();
@@ -21,9 +21,11 @@ export function LoginForm() {
     try {
       const body = (await api.post("/api/auth/login/", { email, password })) as {
         access: string;
+        refresh: string;
+        role?: string;
       };
-      setAccessToken(body.access);
-      router.push("/compare");
+      setSession(body.access, body.refresh);
+      router.push(body.role === "admin" ? "/admin" : "/companies");
     } catch (err) {
       const message = err && typeof err === "object" && "message" in err ? String(err.message) : "Login failed.";
       setError(message);

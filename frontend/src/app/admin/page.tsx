@@ -1,13 +1,5 @@
-import { PageHeader } from "@/components/layout/page-header";
+import { AdminSync } from "@/components/market/admin-sync";
 
 export default function AdminPage() {
-  return (
-    <div className="grid gap-6">
-      <PageHeader
-        kicker="Admin"
-        title="Admin"
-        description="Watchlist, crawl runs, and user management will be added here."
-      />
-    </div>
-  );
+  return <AdminSync />;
 }
