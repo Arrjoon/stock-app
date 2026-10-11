@@ -1,8 +1,8 @@
 # NEPSE Stock App
 
 Role-gated dashboard for NEPSE prices, floorsheet behavior, and tagged news.
-Crawling, automatic company tagging, and buyer/seller behavior are implemented.
-Analysis APIs and the frontend dashboard come later.
+Crawling, automatic company tagging, buyer/seller behavior, and the DRF API
+are implemented. The frontend dashboard comes later.
 
 Discovery notes live in [`docs/data-sources.md`](docs/data-sources.md).
 
@@ -44,6 +44,19 @@ docker compose exec web python manage.py compute_analysis
 `Company.objects.filter(active=True)`.
 
 Demo user passwords come from `SEED_*_PASSWORD` in `.env`.
+
+## API
+
+OpenAPI is at http://localhost:8000/api/docs/ (`/api/schema/`). Every JSON
+response uses `{success, message, data}` or `{success: false, error: {code, message, details}}`.
+
+Viewer and above:
+
+- `GET /api/companies/`
+- `GET /api/companies/{symbol-or-id}/`
+- `GET /api/companies/{symbol-or-id}/prices/?range=7d|30d|90d`
+- `GET /api/companies/{symbol-or-id}/behavior/?range=7d|30d|90d`
+- `GET /api/compare/?range=30d` — most volatile (stdev of daily returns), most active (sum of volume), most in the news (tagged articles)
 
 If live NEPSE history is unreachable:
 
