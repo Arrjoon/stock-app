@@ -27,6 +27,14 @@ class Command(BaseCommand):
             month_of_year="*",
             timezone=settings.TIME_ZONE,
         )
+        analysis_cron, _ = CrontabSchedule.objects.get_or_create(
+            minute=str(settings.ANALYSIS_MINUTE),
+            hour=str(settings.ANALYSIS_HOUR),
+            day_of_week="mon-fri",
+            day_of_month="*",
+            month_of_year="*",
+            timezone=settings.TIME_ZONE,
+        )
 
         specs = [
             (
@@ -58,6 +66,12 @@ class Command(BaseCommand):
                 "apps.market.tasks.crawl_floorsheet",
                 "[]",
                 {"crontab": floorsheet_cron},
+            ),
+            (
+                "compute-behavior-after-close",
+                "apps.analysis.tasks.compute_behavior",
+                "[]",
+                {"crontab": analysis_cron},
             ),
         ]
         for name, task, args, schedule in specs:

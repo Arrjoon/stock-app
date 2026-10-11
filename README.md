@@ -168,7 +168,9 @@ docker compose exec web python manage.py sync_beat_schedule
 ```
 
 Beat uses `DatabaseScheduler`. News portals every `CRAWL_NEWS_MINUTES`
-(default 30). Prices after close Mon–Fri 15:00 NPT; floorsheet 15:15 NPT.
+(default 30). Prices after close Mon–Fri 15:00 NPT; floorsheet 15:15 NPT;
+behavior recompute at 15:45 NPT. A floorsheet crawl also queues
+`compute_behavior` when it finishes.
 
 ## Automatic categorization
 
@@ -192,6 +194,8 @@ A hit is stored as `ArticleTag` with `source=auto` and `matched_on` listing the 
 - **Volume anomaly** is a z-score of today's volume against up to 20 earlier sessions. Above 2.5 is flagged.
 - **Brokers** are ranked from the floorsheet. Each broker's `net_qty` is buy quantity minus sell quantity. `top_buyers` are the largest net buyers. `top_sellers` are the largest net sellers. Each row includes buy quantity, sell quantity, and amounts.
 - **News count** is how many tagged articles were published that day. Next-day return and volume change use the following trading session.
+
+Weekdays at 15:45 NPT, Beat runs the same job again.
 
 ## Tests
 
