@@ -13,7 +13,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-RUN chmod +x /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh \
+    && DJANGO_SETTINGS_MODULE=config.settings \
+       DJANGO_ENV=development \
+       python manage.py collectstatic --noinput
 
 EXPOSE 8000
 

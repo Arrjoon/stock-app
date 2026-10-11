@@ -10,3 +10,4 @@ frontend/.next/
 *.tsbuildinfo
 *.log
 .DS_Store
+www
