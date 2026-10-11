@@ -27,6 +27,39 @@ class Price(models.Model):
         return f"{self.company_id} {self.date}"
 
 
+class PriceRow(models.Model):
+    """Read-only admin surface for market_price.
+
+    Django admin cannot register Price because its primary key is (company, date).
+    """
+
+    id = models.CharField(primary_key=True, max_length=40)
+    company = models.ForeignKey(
+        "companies.Company",
+        on_delete=models.DO_NOTHING,
+        related_name="+",
+        db_column="company_id",
+    )
+    date = models.DateField()
+    open = models.DecimalField(max_digits=12, decimal_places=2)
+    high = models.DecimalField(max_digits=12, decimal_places=2)
+    low = models.DecimalField(max_digits=12, decimal_places=2)
+    close = models.DecimalField(max_digits=12, decimal_places=2)
+    volume = models.BigIntegerField()
+    turnover = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
+    trades = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = "market_price_admin"
+        verbose_name = "price"
+        verbose_name_plural = "prices"
+        ordering = ["-date", "company"]
+
+    def __str__(self):
+        return f"{self.company_id} {self.date}"
+
+
 class Floorsheet(models.Model):
     company = models.ForeignKey(
         "companies.Company",
