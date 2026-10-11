@@ -80,7 +80,7 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       COMPANIES_YAML: /app/companies.yaml
       RUN_MIGRATIONS: "0"
-    command: celery -A config worker --loglevel=info -Q crawl,market,ml,celery
+    command: celery -A config worker --loglevel=info -Q crawl,market,ml,celery -E
     volumes:
       - ./companies.yaml:/app/companies.yaml:ro
     depends_on:
@@ -116,6 +116,27 @@ services:
         condition: service_healthy
       web:
         condition: service_healthy
+
+  flower:
+    image: mher/flower:2.0
+    restart: unless-stopped
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      TZ: Asia/Kathmandu
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      FLOWER_PORT: "5555"
+      FLOWER_UNAUTHENTICATED_API: "true"
+    command: celery --broker=redis://redis:6379/1 flower --port=5555
+    ports:
+      - "${FLOWER_PORT:-5555}:5555"
+    depends_on:
+      redis:
+        condition: service_healthy
+      worker:
+        condition: service_started
 
   frontend:
     build:

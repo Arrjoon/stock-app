@@ -1,8 +1,8 @@
 # NEPSE Stock App
 
 Role-gated dashboard for NEPSE prices, floorsheet behavior, and tagged news.
-Crawling, automatic company tagging, buyer/seller behavior, and the DRF API
-are implemented. The frontend dashboard comes later.
+Crawling, automatic company tagging, buyer/seller behavior, the DRF API, and
+the live Next.js dashboard are implemented.
 
 Discovery notes live in [`docs/data-sources.md`](docs/data-sources.md).
 
@@ -23,6 +23,7 @@ docker compose up --build
 - API health: http://localhost:8000/api/health/
 - Swagger: http://localhost:8000/api/docs/
 - Django admin: http://localhost:8000/admin/
+- Flower (Celery tasks): http://localhost:5555/
 - JWT: `POST /api/auth/login`, `POST /api/auth/refresh`
 
 If 3000, 8000, 5432, or 6379 are already in use, change `FRONTEND_PORT`,
@@ -45,7 +46,7 @@ docker compose exec web python manage.py compute_analysis
 
 Demo user passwords come from `SEED_*_PASSWORD` in `.env`.
 
-## API
+## API and live dashboard
 
 OpenAPI is at http://localhost:8000/api/docs/ (`/api/schema/`). Every JSON
 response uses `{success, message, data}` or `{success: false, error: {code, message, details}}`.
@@ -60,6 +61,12 @@ Viewer and above:
 - `GET /api/compare/?range=30d` — most volatile (stdev of daily returns), most active (sum of volume), most in the news (tagged articles)
 
 Analyst and admin: `POST /api/news/{id}/recategorize/` with `{"company_ids": [1]}`.
+
+The dashboard signs in at `/login`, stores the JWT, and opens
+`ws://<api-host>/ws/updates?token=...`. New articles, recategorization,
+price crawls, and behavior runs publish on that socket so the company page
+and the comparison page refetch. Prices live in the Timescale hypertable
+`market_price`. Crawl and inference jobs stay on Redis/Celery.
 
 If live NEPSE history is unreachable:
 
@@ -183,6 +190,8 @@ docker compose exec worker celery -A config inspect active
 docker compose exec web python manage.py sync_beat_schedule
 ```
 
+Flower is http://localhost:5555/ (`FLOWER_PORT`). It reads worker events from the same Redis broker, so the worker is started with `-E`. Set `FLOWER_BASIC_AUTH=user:password` to require a login.
+
 Beat uses `DatabaseScheduler`. News portals every `CRAWL_NEWS_MINUTES`
 (default 30). Prices after close Mon–Fri 15:00 NPT; floorsheet 15:15 NPT;
 behavior recompute at 15:45 NPT. A floorsheet crawl also queues
@@ -239,8 +248,9 @@ python manage.py runserver
 Celery (separate terminals):
 
 ```bash
-celery -A config worker --loglevel=info -Q crawl,market,ml,celery
+celery -A config worker --loglevel=info -Q crawl,market,ml,celery -E
 celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+celery -A config flower --port=5555
 ```
 
 ## Environment
