@@ -1,61 +1,53 @@
-from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from apps.accounts.models import User
 
 
 class Command(BaseCommand):
-    help = "Create one demo user per role. Passwords come from environment variables."
+    help = "Create admin, analyst, and viewer sign-in accounts."
 
     def handle(self, *args, **options):
         specs = [
             {
-                "email": "admin@example.com",
+                "email": "admin@gmail.com",
                 "username": "admin",
                 "role": User.Role.ADMIN,
-                "password": settings.SEED_ADMIN_PASSWORD,
-                "env_name": "SEED_ADMIN_PASSWORD",
+                "password": "admin",
                 "is_staff": True,
                 "is_superuser": True,
             },
             {
-                "email": "analyst@example.com",
+                "email": "analyst@gmail.com",
                 "username": "analyst",
                 "role": User.Role.ANALYST,
-                "password": settings.SEED_ANALYST_PASSWORD,
-                "env_name": "SEED_ANALYST_PASSWORD",
+                "password": "analyst",
                 "is_staff": False,
                 "is_superuser": False,
             },
             {
-                "email": "viewer@example.com",
+                "email": "viewer@gmail.com",
                 "username": "viewer",
                 "role": User.Role.VIEWER,
-                "password": settings.SEED_VIEWER_PASSWORD,
-                "env_name": "SEED_VIEWER_PASSWORD",
+                "password": "viewer",
                 "is_staff": False,
                 "is_superuser": False,
             },
         ]
 
-        missing = [spec["env_name"] for spec in specs if not spec["password"]]
-        if missing:
-            raise CommandError(
-                "Set these environment variables before seeding demo users: "
-                + ", ".join(missing)
-            )
-
         for spec in specs:
-            user, created = User.objects.update_or_create(
-                email=spec["email"],
-                defaults={
-                    "username": spec["username"],
-                    "role": spec["role"],
-                    "is_staff": spec["is_staff"],
-                    "is_superuser": spec["is_superuser"],
-                    "is_active": True,
-                },
-            )
+            user = User.objects.filter(email=spec["email"]).first()
+            if user is None:
+                user = User.objects.filter(username=spec["username"]).first()
+            created = user is None
+            if created:
+                user = User(email=spec["email"], username=spec["username"])
+            user.email = spec["email"]
+            if not User.objects.exclude(pk=user.pk).filter(username=spec["username"]).exists():
+                user.username = spec["username"]
+            user.role = spec["role"]
+            user.is_staff = spec["is_staff"]
+            user.is_superuser = spec["is_superuser"]
+            user.is_active = True
             user.set_password(spec["password"])
             user.save()
             action = "created" if created else "updated"

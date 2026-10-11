@@ -9,7 +9,7 @@ import { setSession } from "@/lib/session";
 
 export function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("viewer@example.com");
+  const [email, setEmail] = useState("viewer@gmail.com");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);

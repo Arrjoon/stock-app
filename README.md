@@ -19,17 +19,17 @@ The web container migrates, loads `companies.yaml`, writes the Beat schedule, an
 | Django admin | http://localhost:8000/admin/ |
 | Flower | http://localhost:5555/ |
 
-Sign in at `/login`. Demo users are not created automatically:
+Sign in at `/login`. Create the accounts with:
 
 ```bash
 docker compose exec web python manage.py seed_demo_users
 ```
 
-| Email | Role | Password env |
+| Email | Role | Password |
 |---|---|---|
-| admin@example.com | admin | `SEED_ADMIN_PASSWORD` |
-| analyst@example.com | analyst | `SEED_ANALYST_PASSWORD` |
-| viewer@example.com | viewer | `SEED_VIEWER_PASSWORD` |
+| admin@gmail.com | admin | admin |
+| analyst@gmail.com | analyst | analyst |
+| viewer@gmail.com | viewer | viewer |
 
 If a host port is taken, change `FRONTEND_PORT`, `BACKEND_PORT`, `POSTGRES_PORT`, `REDIS_PORT`, and `NEXT_PUBLIC_API_URL` in `.env`, then rebuild the frontend. `NEXT_PUBLIC_*` is baked in at image build time.
 

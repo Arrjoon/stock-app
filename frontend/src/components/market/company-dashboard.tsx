@@ -51,8 +51,9 @@ export function CompanyDashboard({ companyKey }: { companyKey: string }) {
   const [prices, setPrices] = useState<Price[]>([]);
   const [points, setPoints] = useState<BehaviorPoint[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [watchlist, setWatchlist] = useState<Company[]>([]);
+  const [tagDrafts, setTagDrafts] = useState<Record<number, string>>({});
   const [error, setError] = useState("");
-  const [tagDraft, setTagDraft] = useState("");
 
   const load = useCallback(async () => {
     if (!getAccessToken()) {
@@ -61,17 +62,27 @@ export function CompanyDashboard({ companyKey }: { companyKey: string }) {
     }
     try {
       const profile = await loadPayload<Company>(`/api/companies/${companyKey}/`);
-      const [series, behavior, news] = await Promise.all([
+      const [series, behavior, news, board] = await Promise.all([
         loadPayload<Price[]>(`/api/companies/${profile.id}/prices/?range=${range}`),
         loadPayload<{ latest: BehaviorPoint | null; points: BehaviorPoint[] }>(
           `/api/companies/${profile.id}/behavior/?range=${range}`,
         ),
         loadPayload<{ results: Article[] }>(`/api/news/?company_id=${profile.id}`),
+        loadPayload<Company[]>("/api/companies/"),
       ]);
+      const stories = news.results || [];
       setCompany(profile);
       setPrices(series);
       setPoints(behavior.points || []);
-      setArticles(news.results || []);
+      setArticles(stories);
+      setWatchlist(board);
+      setTagDrafts((current) => {
+        const next: Record<number, string> = {};
+        for (const article of stories) {
+          next[article.id] = current[article.id] ?? article.tags.map((tag) => tag.symbol).join(", ");
+        }
+        return next;
+      });
       setError("");
     } catch (err) {
       const status = err && typeof err === "object" && "status" in err ? Number(err.status) : 0;
@@ -102,16 +113,16 @@ export function CompanyDashboard({ companyKey }: { companyKey: string }) {
   }, [points, prices]);
 
   async function correctTags(articleId: number) {
-    if (!company) {
+    const typed = (tagDrafts[articleId] || "")
+      .split(",")
+      .map((part) => part.trim().toUpperCase())
+      .filter(Boolean);
+    const companyIds = typed.map((symbol) => watchlist.find((item) => item.symbol.toUpperCase() === symbol)?.id);
+    if (typed.length !== companyIds.filter(Boolean).length) {
+      setError(`Use symbols separated by commas: ${watchlist.map((item) => item.symbol).join(", ")}`);
       return;
     }
-    const companyIds = tagDraft
-      .split(",")
-      .map((part) => Number(part.trim()))
-      .filter((value) => Number.isInteger(value) && value > 0);
-    await api.post(`/api/news/${articleId}/recategorize/`, {
-      company_ids: companyIds.length ? companyIds : [company.id],
-    });
+    await api.post(`/api/news/${articleId}/recategorize/`, { company_ids: companyIds });
     await load();
   }
 
@@ -228,9 +239,10 @@ export function CompanyDashboard({ companyKey }: { companyKey: string }) {
               <div className="mt-2 flex gap-2">
                 <input
                   className="min-h-9 flex-1 rounded-lg border border-line bg-transparent px-2 text-sm"
-                  placeholder="Company ids, or leave blank for this symbol"
-                  value={tagDraft}
-                  onChange={(event) => setTagDraft(event.target.value)}
+                  aria-label={`Tags for ${article.title}`}
+                  placeholder="NICA, NABIL"
+                  value={tagDrafts[article.id] ?? ""}
+                  onChange={(event) => setTagDrafts((current) => ({ ...current, [article.id]: event.target.value }))}
                 />
                 <button type="button" className="rounded-lg bg-accent px-3 text-sm font-semibold text-[#081018]" onClick={() => void correctTags(article.id)}>
                   Save tags
