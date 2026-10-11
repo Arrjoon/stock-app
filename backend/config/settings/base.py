@@ -173,12 +173,108 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = env.int("CELERY_TASK_TIME_LIMIT", default=900)
+CELERY_TASK_SOFT_TIME_LIMIT = env.int("CELERY_TASK_SOFT_TIME_LIMIT", default=720)
+CELERY_TASK_DEFAULT_QUEUE = "celery"
+CELERY_TASK_ROUTES = {
+    "apps.news.tasks.crawl_portal_news": {"queue": "crawl"},
+    "apps.news.tasks.fetch_article": {"queue": "crawl"},
+    "apps.market.tasks.crawl_prices": {"queue": "market"},
+    "apps.market.tasks.crawl_floorsheet": {"queue": "market"},
+    "apps.analysis.tasks.categorize_article": {"queue": "ml"},
+}
 
 COMPANIES_YAML = env("COMPANIES_YAML", default=str(BASE_DIR.parent / "companies.yaml"))
+
+CRAWLER_USER_AGENT = env(
+    "CRAWLER_USER_AGENT",
+    default="StockAppBot/0.1 (+https://localhost; research crawler)",
+)
+CRAWLER_TIMEOUT = env.float("CRAWLER_TIMEOUT", default=30.0)
+CRAWL_NEWS_MINUTES = env.int("CRAWL_NEWS_MINUTES", default=30)
+CRAWL_PRICES_HOUR = env.int("CRAWL_PRICES_HOUR", default=15)
+CRAWL_PRICES_MINUTE = env.int("CRAWL_PRICES_MINUTE", default=0)
+CRAWL_FLOORSHEET_HOUR = env.int("CRAWL_FLOORSHEET_HOUR", default=15)
+CRAWL_FLOORSHEET_MINUTE = env.int("CRAWL_FLOORSHEET_MINUTE", default=15)
+NEPSE_TLS_VERIFY = env.bool("NEPSE_TLS_VERIFY", default=False)
+MARKET_PRICE_DAYS = env.int("MARKET_PRICE_DAYS", default=30)
+MARKET_FLOORSHEET_DAYS = env.int("MARKET_FLOORSHEET_DAYS", default=3)
+
+
+def _portal(name, defaults):
+    prefix = f"CRAWLER_{name.upper()}_"
+    cfg = {}
+    for key, value in defaults.items():
+        env_key = f"{prefix}{key.upper()}"
+        if isinstance(value, bool):
+            cfg[key] = env.bool(env_key, default=value)
+        elif isinstance(value, float):
+            cfg[key] = env.float(env_key, default=value)
+        elif isinstance(value, int):
+            cfg[key] = env.int(env_key, default=value)
+        else:
+            cfg[key] = env(env_key, default=value)
+    return cfg
+
+
+CRAWLER_CONFIG = {
+    "merolagani": _portal(
+        "merolagani",
+        {
+            "base_url": "https://merolagani.com",
+            "news_list_url": "https://merolagani.com/NewsList.aspx",
+            "floorsheet_url": "https://merolagani.com/Floorsheet.aspx",
+            "price_history_url": "https://merolagani.com/handlers/webrequesthandler.ashx",
+            "min_interval": 2.0,
+            "max_pages": 5,
+            "enabled": True,
+            "use_selenium": True,
+        },
+    ),
+    "sharesansar": _portal(
+        "sharesansar",
+        {
+            "base_url": "https://www.sharesansar.com",
+            "news_list_url": "https://www.sharesansar.com/category/latest-news",
+            "min_interval": 1.5,
+            "max_pages": 5,
+            "enabled": True,
+            "use_selenium": False,
+        },
+    ),
+    "nepsealpha": _portal(
+        "nepsealpha",
+        {
+            "base_url": "https://nepsealpha.com",
+            "news_list_url": "https://nepsealpha.com/",
+            "min_interval": 2.0,
+            "max_pages": 1,
+            "enabled": False,
+            "use_selenium": False,
+        },
+    ),
+    "bizmandu": _portal(
+        "bizmandu",
+        {
+            "base_url": "https://wp.bizmandu.com",
+            "news_list_url": "https://wp.bizmandu.com/content/category/market.html",
+            "min_interval": 2.0,
+            "max_pages": 5,
+            "enabled": True,
+            "use_selenium": False,
+        },
+    ),
+}
 
 SEED_ADMIN_PASSWORD = env("SEED_ADMIN_PASSWORD", default="")
 SEED_ANALYST_PASSWORD = env("SEED_ANALYST_PASSWORD", default="")
 SEED_VIEWER_PASSWORD = env("SEED_VIEWER_PASSWORD", default="")
+
+LOG_DIR = Path(env("LOG_DIR", default=str(BASE_DIR / "logs")))
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOGGING = {
     "version": 1,
@@ -188,6 +284,30 @@ LOGGING = {
     },
     "handlers": {
         "console": {"class": "logging.StreamHandler", "formatter": "plain"},
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": str(LOG_DIR / "crawler.log"),
+            "maxBytes": 5_000_000,
+            "backupCount": 3,
+            "formatter": "plain",
+        },
     },
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
+    "loggers": {
+        "apps.crawling": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "apps.news": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "apps.market": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
 }
