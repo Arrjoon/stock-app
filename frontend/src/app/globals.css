@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #080b12;
+  --color-ink: #eef2f7;
+  --color-ink-80: rgba(238, 242, 247, 0.76);
+  --color-ink-60: rgba(238, 242, 247, 0.56);
+  --color-line: rgba(255, 255, 255, 0.1);
+  --color-accent: #5b9dff;
+  --color-accent-hover: #7eb0ff;
+  --color-accent-soft: rgba(91, 157, 255, 0.16);
+  --color-paper: rgba(16, 22, 34, 0.86);
+  --color-danger: #f0a4a4;
+  --color-danger-bg: rgba(176, 48, 48, 0.22);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(720px 380px at 88% -18%, rgba(91, 157, 255, 0.14), transparent 58%),
+    var(--color-bg);
+  color: var(--color-ink);
+}

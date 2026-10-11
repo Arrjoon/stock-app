@@ -1,0 +1,25 @@
+companies:
+  - symbol: NABIL
+    name: Nabil Bank Limited
+    aliases: [Nabil, Nabil Bank]
+  - symbol: NICA
+    name: NIC Asia Bank Limited
+    aliases: [NIC Asia, NICA Bank]
+  - symbol: NMB
+    name: NMB Bank Limited
+    aliases: [NMB, NMB Bank]
+  - symbol: SCB
+    name: Standard Chartered Bank Nepal Limited
+    aliases: [Standard Chartered, SCB Nepal]
+  - symbol: NLIC
+    name: Nepal Life Insurance Company Limited
+    aliases: [Nepal Life, NLIC]
+  - symbol: NTC
+    name: Nepal Doorsanchar Company Limited
+    aliases: [Nepal Telecom, NTC]
+  - symbol: UPPER
+    name: Upper Tamakoshi Hydropower Limited
+    aliases: [Upper Tamakoshi, UPPER]
+  - symbol: HIDCL
+    name: Hydroelectricity Investment and Development Company Limited
+    aliases: [HIDCL, HIDCL Nepal]

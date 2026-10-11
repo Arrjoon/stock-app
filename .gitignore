@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+backend/media/
+backend/staticfiles/
+frontend/node_modules/
+frontend/.next/
+*.tsbuildinfo
+*.log
+.DS_Store
