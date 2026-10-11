@@ -4,12 +4,11 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import api from "@/api/apiclient/axios";
-import { ErrorState } from "@/components/error/ErrorState";
 import { setSession } from "@/lib/session";
 
 export function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("viewer@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -35,34 +34,33 @@ export function LoginForm() {
   }
 
   return (
-    <form className="grid max-w-md gap-3 rounded-2xl border border-line bg-paper p-5" onSubmit={onSubmit}>
-      <label className="grid gap-1 text-sm text-ink-80">
-        Email
-        <input
-          className="min-h-10 rounded-lg border border-line bg-transparent px-3 text-ink"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-      </label>
-      <label className="grid gap-1 text-sm text-ink-80">
-        Password
-        <input
-          className="min-h-10 rounded-lg border border-line bg-transparent px-3 text-ink"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
-      </label>
-      {error ? <ErrorState message={error} /> : null}
+    <form className="grid w-full max-w-sm gap-4" onSubmit={onSubmit}>
+      <h1 className="m-0 text-center text-2xl font-semibold tracking-tight">Sign in</h1>
+      <input
+        className="min-h-11 rounded-lg border border-line bg-paper px-3 text-ink outline-none"
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        autoComplete="username"
+        required
+      />
+      <input
+        className="min-h-11 rounded-lg border border-line bg-paper px-3 text-ink outline-none"
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        autoComplete="current-password"
+        required
+      />
+      {error ? <p className="m-0 text-center text-sm text-danger">{error}</p> : null}
       <button
-        className="min-h-10 rounded-lg bg-accent px-4 font-semibold text-[#081018] disabled:opacity-60"
+        className="min-h-11 rounded-lg bg-accent font-semibold text-[#081018] disabled:opacity-60"
         type="submit"
         disabled={pending}
       >
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? "Signing in…" : "Login"}
       </button>
     </form>
   );

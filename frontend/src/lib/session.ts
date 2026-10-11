@@ -1,5 +1,12 @@
 const ACCESS = "access_token";
 const REFRESH = "refresh_token";
+export const SESSION_EVENT = "session-changed";
+
+function notifySession() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(SESSION_EVENT));
+  }
+}
 
 export function getAccessToken(): string {
   if (typeof window === "undefined") {
@@ -22,11 +29,13 @@ export function getRefreshToken(): string {
 export function setSession(access: string, refresh: string) {
   window.localStorage.setItem(ACCESS, access);
   window.localStorage.setItem(REFRESH, refresh);
+  notifySession();
 }
 
 export function clearAccessToken() {
   window.localStorage.removeItem(ACCESS);
   window.localStorage.removeItem(REFRESH);
+  notifySession();
 }
 
 export function apiBase(): string {

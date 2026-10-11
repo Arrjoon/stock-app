@@ -1,5 +1,9 @@
-import { redirect } from "next/navigation";
+import { LoginForm } from "./login/login-form";
 
 export default function Home() {
-  redirect("/login");
+  return (
+    <div className="flex min-h-[70vh] items-center justify-center">
+      <LoginForm />
+    </div>
+  );
 }
