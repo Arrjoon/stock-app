@@ -61,7 +61,27 @@ function createApiClient(baseURL: string) {
 
       return response.data;
     },
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
+      const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+      if (error.response?.status === 401 && original && !original._retry && typeof window !== "undefined") {
+        const refresh = window.localStorage.getItem("refresh_token");
+        if (refresh && !original.url?.includes("/api/auth/")) {
+          original._retry = true;
+          try {
+            const refreshed = await axios.post(`${baseURL}/api/auth/refresh/`, { refresh });
+            const access = refreshed.data?.access as string | undefined;
+            if (access) {
+              window.localStorage.setItem("access_token", access);
+              original.headers.set("Authorization", `Bearer ${access}`);
+              return instance(original);
+            }
+          } catch {
+            window.localStorage.removeItem("access_token");
+            window.localStorage.removeItem("refresh_token");
+          }
+        }
+      }
+
       if (!error.response) {
         return Promise.reject({
           code: 'network_error',
