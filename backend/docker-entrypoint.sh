@@ -11,6 +11,7 @@ if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
     attempt=$((attempt + 1))
     sleep 2
   done
+  python manage.py sync_beat_schedule
 fi
 
 exec "$@"

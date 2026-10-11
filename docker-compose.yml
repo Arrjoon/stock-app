@@ -80,7 +80,7 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       COMPANIES_YAML: /app/companies.yaml
       RUN_MIGRATIONS: "0"
-    command: celery -A config worker --loglevel=info
+    command: celery -A config worker --loglevel=info -Q crawl,market,ml,celery
     volumes:
       - ./companies.yaml:/app/companies.yaml:ro
     depends_on:
