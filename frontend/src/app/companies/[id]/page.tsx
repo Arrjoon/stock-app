@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/layout/page-header";
+import { CompanyDashboard } from "@/components/market/company-dashboard";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -6,14 +6,5 @@ type Props = {
 
 export default async function CompanyPage({ params }: Props) {
   const { id } = await params;
-
-  return (
-    <div className="grid gap-6">
-      <PageHeader
-        kicker="Company"
-        title={id.toUpperCase()}
-        description="Prices, news, and behavior summary will appear on this page."
-      />
-    </div>
-  );
+  return <CompanyDashboard companyKey={id} />;
 }

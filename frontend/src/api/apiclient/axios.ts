@@ -18,6 +18,13 @@ function createApiClient(baseURL: string) {
   });
 
   instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    if (typeof window !== 'undefined') {
+      const token = window.localStorage.getItem('access_token');
+      if (token) {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+
     if (typeof window !== 'undefined' && !window.navigator.onLine) {
       return Promise.reject({
         code: 'NETWORK_OFFLINE',
