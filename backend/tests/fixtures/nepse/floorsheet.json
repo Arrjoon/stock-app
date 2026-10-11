@@ -1,0 +1,12 @@
+[
+  {
+    "businessDate": "2026-09-12",
+    "contractId": "20260912001",
+    "stockSymbol": "NABIL",
+    "buyerMemberId": "58",
+    "sellerMemberId": "17",
+    "contractQuantity": 100,
+    "contractRate": "508.00",
+    "contractAmount": "50800.00"
+  }
+]
