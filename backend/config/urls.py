@@ -43,5 +43,6 @@ urlpatterns = [
     path("api/auth/login/", TokenObtainPairView.as_view(), name="token-obtain-pair"),
     path("api/auth/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("api/companies/", include("apps.companies.urls")),
+    path("api/news/", include("apps.news.urls")),
     path("api/compare/", CompareView.as_view(), name="compare"),
 ]

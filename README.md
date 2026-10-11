@@ -56,7 +56,10 @@ Viewer and above:
 - `GET /api/companies/{symbol-or-id}/`
 - `GET /api/companies/{symbol-or-id}/prices/?range=7d|30d|90d`
 - `GET /api/companies/{symbol-or-id}/behavior/?range=7d|30d|90d`
+- `GET /api/news/?company_id=`
 - `GET /api/compare/?range=30d` — most volatile (stdev of daily returns), most active (sum of volume), most in the news (tagged articles)
+
+Analyst and admin: `POST /api/news/{id}/recategorize/` with `{"company_ids": [1]}`.
 
 If live NEPSE history is unreachable:
 
