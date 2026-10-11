@@ -1,0 +1,821 @@
+openapi: 3.0.3
+info:
+  title: NEPSE Stock API
+  version: 0.1.0
+  description: Role-gated NEPSE market, news, and analysis API.
+paths:
+  /api/admin/crawl-runs/:
+    get:
+      operationId: admin_crawl_runs_list
+      summary: Recent crawl runs
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CrawlRun'
+          description: ''
+    post:
+      operationId: admin_crawl_runs_create
+      summary: Queue a crawl
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrawlRunCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CrawlRunCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CrawlRunCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrawlRun'
+          description: ''
+  /api/admin/sync/:
+    get:
+      operationId: admin_sync_retrieve
+      summary: Recent crawl runs
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: admin_sync_create
+      summary: Queue news, prices, and floorsheet now
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/admin/users/:
+    get:
+      operationId: admin_users_list
+      summary: List users
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: admin_users_create
+      summary: Create a user
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/admin/users/{id}/:
+    patch:
+      operationId: admin_users_partial_update
+      summary: Change role or deactivate
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleTokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoleTokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoleTokenObtainPairRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      summary: Current user
+      tags:
+      - Auth
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/companies/:
+    get:
+      operationId: companies_list
+      summary: Active watchlist
+      tags:
+      - Companies
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Company'
+          description: ''
+  /api/companies/{key}/:
+    get:
+      operationId: companies_retrieve
+      summary: One company
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      tags:
+      - Companies
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+          description: ''
+    patch:
+      operationId: companies_partial_update
+      summary: Update watchlist fields
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyUpdateRequest'
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+          description: ''
+  /api/companies/{key}/behavior/:
+    get:
+      operationId: companies_behavior_retrieve
+      summary: VWAP, pressure, anomalies, and broker ranks
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: range
+        schema:
+          type: string
+        description: 'Lookback window: 7d, 30d, or 90d.'
+      tags:
+      - Analysis
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/companies/{key}/behaviorsummary/:
+    get:
+      operationId: companies_behaviorsummary_retrieve
+      summary: Behavior summary
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: range
+        schema:
+          type: string
+        description: 'Lookback window: 7d, 30d, or 90d.'
+      tags:
+      - Analysis
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/companies/{key}/export/:
+    get:
+      operationId: companies_export_retrieve
+      summary: Export prices, analysis, and tagged news
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      tags:
+      - Analysis
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/companies/{key}/prices/:
+    get:
+      operationId: companies_prices_list
+      summary: Daily OHLCV
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: range
+        schema:
+          type: string
+        description: 'Lookback window: 7d, 30d, or 90d.'
+      tags:
+      - Market
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Price'
+          description: ''
+  /api/compare/:
+    get:
+      operationId: compare_retrieve
+      summary: Most volatile, most active, and most in the news
+      parameters:
+      - in: query
+        name: range
+        schema:
+          type: string
+        description: 'Lookback window: 7d, 30d, or 90d.'
+      tags:
+      - Analysis
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/health/:
+    get:
+      operationId: health
+      description: Liveness probe for Docker and load balancers.
+      summary: Liveness
+      tags:
+      - Health
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+          description: ''
+  /api/news/:
+    get:
+      operationId: news_list
+      summary: Categorized news
+      parameters:
+      - in: query
+        name: company_id
+        schema:
+          type: integer
+      tags:
+      - News
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+          description: ''
+  /api/news/{id}/recategorize/:
+    post:
+      operationId: news_recategorize_create
+      summary: Replace article tags
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - News
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecategorizeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecategorizeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecategorizeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          maxLength: 600
+        portal:
+          type: string
+          maxLength: 50
+        title:
+          type: string
+        body:
+          type: string
+        raw_date:
+          type: string
+          maxLength: 60
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        categorized:
+          type: boolean
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleTag'
+          readOnly: true
+      required:
+      - id
+      - portal
+      - tags
+      - title
+      - url
+    ArticleTag:
+      type: object
+      properties:
+        company:
+          type: integer
+        symbol:
+          type: string
+          readOnly: true
+        confidence:
+          type: number
+          format: double
+          maximum: 1.0
+          minimum: 0.0
+        source:
+          $ref: '#/components/schemas/SourceEnum'
+        matched_on: {}
+      required:
+      - company
+      - confidence
+      - symbol
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        symbol:
+          type: string
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 200
+        sector:
+          type: string
+          maxLength: 100
+        aliases: {}
+        active:
+          type: boolean
+      required:
+      - id
+      - name
+      - symbol
+    CrawlRun:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        portal:
+          type: string
+          maxLength: 50
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        items:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        error:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        triggered_by:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        celery_task_id:
+          type: string
+          maxLength: 64
+      required:
+      - id
+      - kind
+      - started_at
+      - triggered_by
+    CrawlRunCreateRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        portal:
+          type: string
+          default: ''
+      required:
+      - kind
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        service:
+          type: string
+      required:
+      - service
+      - status
+    KindEnum:
+      enum:
+      - news
+      - prices
+      - floorsheet
+      type: string
+      description: |-
+        * `news` - News
+        * `prices` - Prices
+        * `floorsheet` - Floorsheet
+    PatchedCompanyUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        aliases: {}
+        active:
+          type: boolean
+    PatchedUserUpdateRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+    Price:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        open:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        high:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        low:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        close:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        volume:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        turnover:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,16}(?:\.\d{0,2})?$
+          nullable: true
+        trades:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+      required:
+      - close
+      - date
+      - high
+      - low
+      - open
+      - volume
+    RecategorizeRequest:
+      type: object
+      properties:
+        company_ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+      required:
+      - company_ids
+    RoleEnum:
+      enum:
+      - admin
+      - analyst
+      - viewer
+      type: string
+      description: |-
+        * `admin` - Admin
+        * `analyst` - Analyst
+        * `viewer` - Viewer
+    RoleTokenObtainPairRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    SourceEnum:
+      enum:
+      - auto
+      - manual
+      type: string
+      description: |-
+        * `auto` - Auto
+        * `manual` - Manual
+    StatusEnum:
+      enum:
+      - queued
+      - running
+      - success
+      - failed
+      type: string
+      description: |-
+        * `queued` - Queued
+        * `running` - Running
+        * `success` - Success
+        * `failed` - Failed
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+      required:
+      - email
+      - id
+      - username
+    UserCreateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - email
+      - password
+      - username
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+- name: Health
+  description: Liveness
+- name: Auth
+  description: JWT login and refresh

@@ -9,7 +9,17 @@ from apps.news.models import Article, ArticleTag
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ("id", "symbol", "name", "sector", "active")
+        fields = ("id", "symbol", "name", "sector", "aliases", "active")
+
+
+class CompanyUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ("name", "aliases", "active")
+
+
+class RangeQuerySerializer(serializers.Serializer):
+    range = serializers.ChoiceField(choices=["7d", "30d", "90d"], default="30d")
 
 
 class PriceSerializer(serializers.ModelSerializer):

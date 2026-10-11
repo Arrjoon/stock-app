@@ -12,6 +12,8 @@ if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
     sleep 2
   done
   python manage.py sync_beat_schedule
+  python manage.py sync_companies
+  python manage.py bootstrap_sync
 fi
 
 exec "$@"

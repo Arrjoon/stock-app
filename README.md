@@ -62,6 +62,8 @@ Viewer and above:
 
 Analyst and admin: `POST /api/news/{id}/recategorize/` with `{"company_ids": [1]}`.
 
+An admin can press **Sync now** in the header. That queues news, prices, and the floorsheet immediately. On a fresh database the web container queues the same jobs at startup, then Beat keeps the weekday schedule.
+
 The dashboard signs in at `/login`, stores the JWT, and opens
 `ws://<api-host>/ws/updates?token=...`. New articles, recategorization,
 price crawls, and behavior runs publish on that socket so the company page

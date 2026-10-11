@@ -145,6 +145,16 @@ SPECTACULAR_SETTINGS = {
     "SERVE_AUTHENTICATION": [],
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": "/api",
+    "SECURITY": [{"bearerAuth": []}],
+    "COMPONENTS": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    },
     "TAGS": [
         {"name": "Health", "description": "Liveness"},
         {"name": "Auth", "description": "JWT login and refresh"},

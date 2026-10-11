@@ -1,3 +1,4 @@
+from django.db import transaction
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.views import APIView
@@ -5,7 +6,7 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import IsAnalystOrAdmin, IsViewerOrAbove
 from apps.companies.serializers import ArticleSerializer, RecategorizeSerializer
 from apps.news.models import Article, ArticleTag, TagCorrection
-from apps.realtime.notify import publish_update
+from apps.realtime.notify import notify
 from common.responses import success_response
 
 
@@ -27,7 +28,20 @@ class NewsListView(APIView):
             if not str(company_id).isdigit():
                 raise ValidationError({"company_id": "Must be an integer."})
             articles = articles.filter(tags__company_id=int(company_id)).distinct()
-        return success_response(ArticleSerializer(articles[:40], many=True).data)
+        try:
+            page = max(int(request.query_params.get("page") or 1), 1)
+        except (TypeError, ValueError):
+            page = 1
+        page_size = 20
+        start = (page - 1) * page_size
+        window = articles[start : start + page_size]
+        return success_response(
+            {
+                "count": articles.count(),
+                "page": page,
+                "results": ArticleSerializer(window, many=True).data,
+            }
+        )
 
 
 class RecategorizeView(APIView):
@@ -41,27 +55,28 @@ class RecategorizeView(APIView):
         serializer = RecategorizeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         company_ids = serializer.validated_data["company_ids"]
-        old_tags = list(article.tags.values("company_id", "confidence", "source", "matched_on"))
-        article.tags.all().delete()
-        new_tags = []
-        for company_id in company_ids:
-            tag = ArticleTag.objects.create(
+        with transaction.atomic():
+            old_tags = list(article.tags.values("company_id", "confidence", "source", "matched_on"))
+            article.tags.all().delete()
+            new_tags = []
+            for company_id in company_ids:
+                tag = ArticleTag.objects.create(
+                    article=article,
+                    company_id=company_id,
+                    confidence=1.0,
+                    source=ArticleTag.Source.MANUAL,
+                    matched_on=[{"kind": "manual"}],
+                )
+                new_tags.append(
+                    {"company_id": tag.company_id, "confidence": tag.confidence, "source": tag.source}
+                )
+            TagCorrection.objects.create(
                 article=article,
-                company_id=company_id,
-                confidence=1.0,
-                source=ArticleTag.Source.MANUAL,
-                matched_on=[{"kind": "manual"}],
+                old_tags=old_tags,
+                new_tags=new_tags,
+                user=request.user,
             )
-            new_tags.append(
-                {"company_id": tag.company_id, "confidence": tag.confidence, "source": tag.source}
-            )
-        TagCorrection.objects.create(
-            article=article,
-            old_tags=old_tags,
-            new_tags=new_tags,
-            user=request.user,
-        )
-        article.categorized = True
-        article.save(update_fields=["categorized"])
-        publish_update("article.categorized", article_id=article.id, company_ids=company_ids)
+            article.categorized = True
+            article.save(update_fields=["categorized"])
+            notify("news", article_id=article.id, company_ids=company_ids)
         return success_response(ArticleSerializer(article).data, message="Tags updated.")
